@@ -12,3 +12,4 @@ for j in l:
     sqr(j)
     w = []
 
+person('Jack', 24, city=extra['city'], job=extra['job'])
