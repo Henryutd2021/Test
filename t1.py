@@ -20,3 +20,5 @@ person('Adam', 45, gender='M', job='Engineer')
 extra = {'city': 'Beijing', 'job': 'Engineer'}
 
 person('Jack', 24, city=extra['city'], job=extra['job'])
+
+print([6]*2)
