@@ -20,3 +20,5 @@ person('Adam', 45, gender='M', job='Engineer')
 extra = {'city': 'Beijing', 'job': 'Engineer'}
 
 person('Jack', 24, city=extra['city'], job=extra['job'])
+
+path = 'C:/Users/hxl210015/REopt_Lite_API-hes_nuclear/hes-nuclear/results/base_case.json'
