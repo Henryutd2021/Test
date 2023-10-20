@@ -7,8 +7,7 @@ class Square:  # 正方形
         self.length = l  # 边长
 
     def __setattr__(self, key, value):
-        s = "调用__setattr__, key={}, value={}".format(
-            key, value)
+        s = f"调用__setattr__, key={key}, value={value}"
         print(s)
 
         if key == "length" and value > 0:

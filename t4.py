@@ -5,7 +5,7 @@ icount = 0
 iter_num = 10000000
 # x_axis = []
 # y_axis = []
-for i in range(iter_num):
+for _ in range(iter_num):
     x = random.random()
     y = random.random()
 

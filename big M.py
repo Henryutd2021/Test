@@ -30,13 +30,10 @@ def find_C(model_str):
     c_temple = [float(i) for i in c_temple]
     c_list_1 = c_temple[1::2]
     c_list_2 = c_temple[::2]
-    c = []
-    for i in range(x_max + 1):
-        c.append(0)
+    c = [0 for _ in range(x_max + 1)]
     for i in range(len(c_list_1)):
         c[int(c_list_1[i])] = c_list_2[i]
-    c = np.array(c)
-    return c
+    return np.array(c)
 
 
 # 求系数矩阵+资源向量
@@ -45,22 +42,18 @@ def find_A(model_str):
     x_temple = re.findall(r"-?\d+\.?\d*", model_str[-1])
     x_temple = [int(i) for i in x_temple]
     x_max = max(x_temple)
-    A = [[0 for i in range(x_max + 1)] for i in range(len(model_str) - 2)]
-    k = 0
-    for element in model_str[1:-1]:
+    A = [[0 for _ in range(x_max + 1)] for _ in range(len(model_str) - 2)]
+    for k, element in enumerate(model_str[1:-1]):
         x_temple = re.findall(r"-?\d+\.?\d*", element)
         x_temple = [float(i) for i in x_temple]
         x_list_1 = x_temple[1::2]
         x_list_2 = x_temple[:-1:2]
-        x = []
         b.append(x_temple[-1])
-        for i in range(x_max + 1):
-            x.append(0)
+        x = [0 for _ in range(x_max + 1)]
         for i in range(len(x_list_1)):
             x[int(x_list_1[i])] = x_list_2[i]
         for num in range(len(x)):
             A[k][num] = x[num]
-        k += 1
     for num in range(len(b)):
         A[num][0] = b[num]
     A = np.array(A, dtype=np.float_)
@@ -79,8 +72,7 @@ def constraintCondition(model_str):
             yueshu.append(1)
         else:
             yueshu.append(0)
-    yueshu = np.array(yueshu)
-    return yueshu
+    return np.array(yueshu)
 
 
 # 对A,b进行标准化
@@ -93,24 +85,14 @@ def change_A(str, A, c, yueshu):
     for i in range(A.shape[0]):
         if yueshu[i] == 1:
             # 添加松弛变量
-            temple_list = [0 for j in range(A.shape[0])]
+            temple_list = [0 for _ in range(A.shape[0])]
             temple_list[i] = -1
             A = np.column_stack((A, temple_list))
 
     for i in range(A.shape[0]):
-        if yueshu[i] == -1:
+        if yueshu[i] in [-1, 1, 0]:
             # 添加剩余变量
-            temple_list = [0 for j in range(A.shape[0])]
-            temple_list[i] = 1
-            A = np.column_stack((A, temple_list))
-        elif yueshu[i] == 1:
-            # 添加人工变量
-            temple_list = [0 for j in range(A.shape[0])]
-            temple_list[i] = 1
-            A = np.column_stack((A, temple_list))
-        elif yueshu[i] == 0:
-            #  添加人工变量
-            temple_list = [0 for j in range(A.shape[0])]
+            temple_list = [0 for _ in range(A.shape[0])]
             temple_list[i] = 1
             A = np.column_stack((A, temple_list))
     return A
@@ -139,13 +121,8 @@ def change_c(str, A, c, yueshu):
             c.append(0)
             c = np.array(c)
 
-        elif yueshu[i] == 1:
+        elif yueshu[i] in [1, 0]:
             # 添加人工变量
-            c = list(c)
-            c.append(-pow(10, 9))
-            c = np.array(c)
-        elif yueshu[i] == 0:
-            #  添加人工变量
             c = list(c)
             c.append(-pow(10, 9))
             c = np.array(c)
@@ -154,10 +131,7 @@ def change_c(str, A, c, yueshu):
 
 # 基变量对应的价值系数
 def C_B(x_b, c, m):
-    c_b = []
-    for element in x_b:
-        c_b.append(c[element])
-    return c_b
+    return [c[element] for element in x_b]
 
 
 # 计算检验数
@@ -167,7 +141,7 @@ def CN(A, c, x_b, c_b, m, n):
         cj = c[num_1]
         for num_2 in range(m):
             cj = cj - c_b[num_2] * A[num_2, num_1]
-        if 0 < cj and cj < 0.0001:
+        if 0 < cj < 0.0001:
             cj = 0
         cn.append(cj)
     return cn
@@ -182,16 +156,11 @@ def judge(A, cn, m, n, x_b, c_b):
             if c_b[j] == -pow(10, 9):
                 if A[j, 0] != 0:
                     return 4  # 无可行解
-        if num == m + 1:
-            return 1  # 有最优解
-        else:
-            return 2  # 有无穷多最优解
+        return 1 if num == m + 1 else 2
     else:
         for num in range(len(cn)):
             if cn[num] > 0:
-                lis = []
-                for i in range(m):
-                    lis.append(A[i, num])
+                lis = [A[i, num] for i in range(m)]
                 if max(lis) < 0:
                     for j in range(len(c_b)):
                         if c_b[j] == -pow(10, 9):
@@ -238,10 +207,7 @@ def X_B(cn, theta, x_b):
 
 # 计算最优值
 def Value(c_b, A, m):
-    value = 0
-    for num in range(m):
-        value += c_b[num] * A[num, 0]
-    return value
+    return sum(c_b[num] * A[num, 0] for num in range(m))
 
 
 # 打印单纯形表
@@ -290,14 +256,12 @@ def Excel(A, c_b, x_b, c, theta, cn, m, n):
 
 def outPut(result, value, x_b, A, X):
     if result == 1:
-        num = 0
-        for i in x_b:
+        for num, i in enumerate(x_b):
             if i <= len(X):
                 if A[num, 0] < 0:
                     print("该问题无可行解:")
                     return
                 X[i - 1] = A[num, 0]
-            num += 1
         print("该问题有最优解:")
         print("X=(", end="")
         for i in range(len(X)):
@@ -309,13 +273,11 @@ def outPut(result, value, x_b, A, X):
         print("最优值:%.3f" % value)
     elif result == 2:
         print("该问题有无穷多解,其中一个最优解为:")
-        num = 0
-        for i in x_b:
+        for num, i in enumerate(x_b):
             if i <= len(X):
                 if A[num, 0] < 0:
                     return 4
                 X[i - 1] = A[num, 0]
-            num += 1
         print("X=(", end="")
         for i in range(len(X)):
             if i == len(X) - 1:
@@ -339,7 +301,7 @@ def solve():
     yueshu = constraintCondition(str)
     c = find_C(str)
     A = find_A(str)
-    X = [0 for i in range(A.shape[1] - 1)]
+    X = [0 for _ in range(A.shape[1] - 1)]
     # 标准化
     A = change_A(str, A, c, yueshu)
     c = change_c(str, A, c, yueshu)
@@ -347,11 +309,7 @@ def solve():
     # 得到矩阵的维数
     m = A.shape[0]
     n = A.shape[1]
-    # 确定初始可行基X的下标,x_b存储可行基X的下标
-    x_b = []
-    for i in range(m):
-        x_b.append(n - m + i)
-
+    x_b = [n - m + i for i in range(m)]
     # X_B对应的价值系数c_b
     c_b = C_B(x_b, c, m)
     # 初始单纯形表建立
